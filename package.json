@@ -1,0 +1,22 @@
+{
+  "name": "movierecommender",
+  "version": "1.0.0",
+  "description": "Python scripts for determining movie recommendations for a given user using data mining techniques. Work is based on Chapter 2 of A Programmer's Guide to Data Mining by Ron Zacharski.",
+  "main": "__init__.py",
+  "scripts": {
+    "main": "python -m src.__main__"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JordanMohler/movie_recommender.git"
+  },
+  "keywords": [
+    "python"
+  ],
+  "author": "Jordan Mohler",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/JordanMohler/movie_recommender/issues"
+  },
+  "homepage": "https://github.com/JordanMohler/movie_recommender#readme"
+}
