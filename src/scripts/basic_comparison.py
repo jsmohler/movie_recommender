@@ -7,22 +7,50 @@
 #
 
 from math import sqrt
-
+from enum import Enum
 
 def manhattan(rating1, rating2):
     """Computes the Manhattan distance. Both rating1 and rating2 are dictionaries
        of the form {'The Strokes': 3.0, 'Slightly Stoopid': 2.5}"""
     distance = 0
-    total = 0
+    commonRating = False
     for key in rating1:
         if key in rating2:
             distance += abs(rating1[key] - rating2[key])
-            total += 1
-    if total > 0:
-        return distance / total
+            commonRating = True
+    if commonRating:
+        return distance
     else:
         return -1 #Indicates no ratings in common
 
+def euclidean(rating1, rating2):
+    """Computes the Manhatten or Euclidean distance using Minkowski generalization. Both rating1 and rating2 are dictionaries
+       of the form {'The Strokes': 3.0, 'Slightly Stoopid': 2.5}"""
+    distance = 0
+    commonRating = False
+    for key in rating1:
+        if key in rating2:
+            distance += abs(rating1[key] - rating2[key]) ** 1/2
+            commonRating = True
+    if commonRating:
+        return distance ** 1/2
+    else:
+        return -1 #Indicates no ratings in common
+
+
+def minkowski(rating1, rating2, r):
+    """Computes the Euclidean distance. Both rating1 and rating2 are dictionaries
+       of the form {'The Strokes': 3.0, 'Slightly Stoopid': 2.5}"""
+    distance = 0
+    commonRating = False
+    for key in rating1:
+        if key in rating2:
+            distance += abs(rating1[key] - rating2[key]) ** 1/r
+            commonRating = True
+    if commonRating:
+        return distance ** 1/r
+    else:
+        return -1 #Indicates no ratings in common
 
 def pearson(rating1, rating2):
     sum_xy = 0
@@ -65,11 +93,11 @@ def recommend(username, users):
     nearest = computeNearestNeighbor(username, users)[0][1]
 
     recommendations = []
-    # now find bands neighbor rated that user didn't
+    # now find movies neighbor rated that user didn't
     neighborRatings = users[nearest]
     userRatings = users[username]
-    for artist in neighborRatings:
-        if not artist in userRatings:
-            recommendations.append((artist, neighborRatings[artist]))
+    for movie in neighborRatings:
+        if not movie in userRatings:
+            recommendations.append((movie, neighborRatings[movie]))
     # using the fn sorted for variety - sort is more efficient
-    return sorted(recommendations, key=lambda artistTuple: artistTuple[1], reverse = True)
+    return sorted(recommendations, key=lambda movieTuple: movieTuple[1], reverse = True)

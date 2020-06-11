@@ -15,7 +15,8 @@ def parse_to_dictionary(workbook_path):
     for row in range(1, worksheet.nrows):
         elm = {}
         for col in range(1, worksheet.ncols):
-            elm[first_row[col]] = worksheet.cell_value(row, col)
+            if worksheet.cell_value(row, col):
+                elm[first_row[col]] = worksheet.cell_value(row, col)
         data[worksheet.cell_value(row, 0)] = elm
     
     return data;
