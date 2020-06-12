@@ -1,6 +1,4 @@
 import xlrd
-import matplotlib.pyplot as plt
-import os
 
 def parse_to_dictionary(workbook_path):
     workbook = xlrd.open_workbook(workbook_path)
@@ -19,15 +17,4 @@ def parse_to_dictionary(workbook_path):
                 elm[first_row[col]] = worksheet.cell_value(row, col)
         data[worksheet.cell_value(row, 0)] = elm
     
-    return data;
-
-def visualize(data):
-    colors = list("rgbcmyk")
-
-    for data_dict in data.values():
-        x = data_dict.keys()
-        y = data_dict.keys()
-        plt.scatter(x, y)
-
-    plt.legend(data.keys())
-    plt.show()
+    return data

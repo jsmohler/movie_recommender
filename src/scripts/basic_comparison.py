@@ -23,35 +23,6 @@ def manhattan(rating1, rating2):
     else:
         return -1 #Indicates no ratings in common
 
-def euclidean(rating1, rating2):
-    """Computes the Manhatten or Euclidean distance using Minkowski generalization. Both rating1 and rating2 are dictionaries
-       of the form {'The Strokes': 3.0, 'Slightly Stoopid': 2.5}"""
-    distance = 0
-    commonRating = False
-    for key in rating1:
-        if key in rating2:
-            distance += abs(rating1[key] - rating2[key]) ** 1/2
-            commonRating = True
-    if commonRating:
-        return distance ** 1/2
-    else:
-        return -1 #Indicates no ratings in common
-
-
-def minkowski(rating1, rating2, r):
-    """Computes the Euclidean distance. Both rating1 and rating2 are dictionaries
-       of the form {'The Strokes': 3.0, 'Slightly Stoopid': 2.5}"""
-    distance = 0
-    commonRating = False
-    for key in rating1:
-        if key in rating2:
-            distance += abs(rating1[key] - rating2[key]) ** 1/r
-            commonRating = True
-    if commonRating:
-        return distance ** 1/r
-    else:
-        return -1 #Indicates no ratings in common
-
 def pearson(rating1, rating2):
     sum_xy = 0
     sum_x = 0

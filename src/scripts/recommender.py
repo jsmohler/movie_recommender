@@ -20,6 +20,10 @@ class recommender:
         self.metric = metric
         if self.metric == 'pearson':
             self.fn = self.pearson
+        elif self.metric == 'euclidean':
+            self.fn = self.euclidean
+        elif self.metric == 'manhattan':
+            self.fn = self.manhattan
         #
         # if data is dictionary set recommender data to it
         #
@@ -33,7 +37,6 @@ class recommender:
         else:
             return id
 
-
     def userRatings(self, id, n):
         """Return n top ratings for user with id"""
         print ("Ratings for " + self.userid2name[id])
@@ -43,78 +46,31 @@ class recommender:
         ratings = [(self.convertProductID2name(k), v)
                    for (k, v) in ratings]
         # finally sort and return
-        ratings.sort(key=lambda artistTuple: artistTuple[1],
+        ratings.sort(key=lambda movieTuple: movieTuple[1],
                      reverse = True)
         ratings = ratings[:n]
         for rating in ratings:
             print("%s\t%i" % (rating[0], rating[1]))
-        
 
-        
+    def minkowski(self, rating1, rating2, r):
+        """Computes the Manhatten or Euclidean distance using Minkowski generalization. Both rating1 and rating2 are dictionaries
+       of the form {'The Strokes': 3.0, 'Slightly Stoopid': 2.5}"""
+        distance = 0
+        commonRating = False
+        for key in rating1:
+            if key in rating2:
+                distance += abs(rating1[key] - rating2[key]) ** 1/r
+                commonRating = True
+        if commonRating:
+            return distance ** 1/r
+        else:
+            return -1 #Indicates no ratings in common
 
-    def loadBookDB(self, path=''):
-        """loads the BX book dataset. Path is where the BX files are
-        located"""
-        self.data = {}
-        i = 0
-        #
-        # First load book ratings into self.data
-        #
-        f = codecs.open(path + "BX-Book-Ratings.csv", 'r', 'utf8')
-        for line in f:
-            i += 1
-            #separate line into fields
-            fields = line.split(';')
-            user = fields[0].strip('"')
-            book = fields[1].strip('"')
-            rating = int(fields[2].strip().strip('"'))
-            if user in self.data:
-                currentRatings = self.data[user]
-            else:
-                currentRatings = {}
-            currentRatings[book] = rating
-            self.data[user] = currentRatings
-        f.close()
-        #
-        # Now load books into self.productid2name
-        # Books contains isbn, title, and author among other fields
-        #
-        f = codecs.open(path + "BX-Books.csv", 'r', 'utf8')
-        for line in f:
-            i += 1
-            #separate line into fields
-            fields = line.split(';')
-            isbn = fields[0].strip('"')
-            title = fields[1].strip('"')
-            author = fields[2].strip().strip('"')
-            title = title + ' by ' + author
-            self.productid2name[isbn] = title
-        f.close()
-        #
-        #  Now load user info into both self.userid2name and
-        #  self.username2id
-        #
-        f = codecs.open(path + "BX-Users.csv", 'r', 'utf8')
-        for line in f:
-            i += 1
-            #print(line)
-            #separate line into fields
-            fields = line.split(';')
-            userid = fields[0].strip('"')
-            location = fields[1].strip('"')
-            if len(fields) > 3:
-                age = fields[2].strip().strip('"')
-            else:
-                age = 'NULL'
-            if age != 'NULL':
-                value = location + '  (age: ' + age + ')'
-            else:
-                value = location
-            self.userid2name[userid] = value
-            self.username2id[location] = userid
-        f.close()
-        print(i)
-                
+    def manhattan(self, rating1, rating2):
+        return self.minkowski(rating1, rating2, 1)
+
+    def euclidean(self, rating1, rating2):
+        return self.minkowski(rating1, rating2, 2)
         
     def pearson(self, rating1, rating2):
         sum_xy = 0
@@ -154,8 +110,8 @@ class recommender:
                                    self.data[instance])
                 distances.append((instance, distance))
         # sort based on distance -- closest first
-        distances.sort(key=lambda artistTuple: artistTuple[1],
-                       reverse=True)
+        distances.sort(key=lambda movieTuple: movieTuple[1],
+                       reverse= self.fn == self.pearson)
         return distances
 
     def recommend(self, user):
@@ -182,22 +138,22 @@ class recommender:
           # get the ratings for this person
           neighborRatings = self.data[name]
           # get the name of the person
-          # now find bands neighbor rated that user didn't
-          for artist in neighborRatings:
-             if not artist in userRatings:
-                if artist not in recommendations:
-                   recommendations[artist] = (neighborRatings[artist]
+          # now find the movies that neighbor rated that user didn't
+          for movie in neighborRatings:
+             if not movie in userRatings:
+                if movie not in recommendations:
+                   recommendations[movie] = (neighborRatings[movie]
                                               * weight)
                 else:
-                   recommendations[artist] = (recommendations[artist]
-                                              + neighborRatings[artist]
+                   recommendations[movie] = (recommendations[movie]
+                                              + neighborRatings[movie]
                                               * weight)
        # now make list from dictionary
        recommendations = list(recommendations.items())
        recommendations = [(self.convertProductID2name(k), v)
                           for (k, v) in recommendations]
        # finally sort and return
-       recommendations.sort(key=lambda artistTuple: artistTuple[1],
+       recommendations.sort(key=lambda movieTuple: movieTuple[1],
                             reverse = True)
        # Return the first n items
        return recommendations[:self.n]
