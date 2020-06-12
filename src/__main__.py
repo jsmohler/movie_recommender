@@ -6,3 +6,5 @@ from .scripts.visualization import visualizeCorrelation
 workbook_path = 'src/data/Sample_Movie_Ratings.xlsx'
 
 user_ratings = parse_to_dictionary(workbook_path)
+
+print(user_ratings)
