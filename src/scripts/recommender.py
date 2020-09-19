@@ -1,5 +1,6 @@
-import codecs 
+import codecs
 from math import sqrt
+
 
 class recommender:
 
@@ -39,7 +40,7 @@ class recommender:
 
     def userRatings(self, id, n):
         """Return n top ratings for user with id"""
-        print ("Ratings for " + self.userid2name[id])
+        print("Ratings for " + self.userid2name[id])
         ratings = self.data[id]
         print(len(ratings))
         ratings = list(ratings.items())
@@ -47,7 +48,7 @@ class recommender:
                    for (k, v) in ratings]
         # finally sort and return
         ratings.sort(key=lambda movieTuple: movieTuple[1],
-                     reverse = True)
+                     reverse=True)
         ratings = ratings[:n]
         for rating in ratings:
             print("%s\t%i" % (rating[0], rating[1]))
@@ -59,19 +60,19 @@ class recommender:
         commonRating = False
         for key in rating1:
             if key in rating2:
-                distance += abs(rating1[key] - rating2[key]) ** 1/r
+                distance += abs(rating1[key] - rating2[key]) ** r
                 commonRating = True
         if commonRating:
             return distance ** 1/r
         else:
-            return -1 #Indicates no ratings in common
+            return -1  # Indicates no ratings in common
 
     def manhattan(self, rating1, rating2):
         return self.minkowski(rating1, rating2, 1)
 
     def euclidean(self, rating1, rating2):
         return self.minkowski(rating1, rating2, 2)
-        
+
     def pearson(self, rating1, rating2):
         sum_xy = 0
         sum_x = 0
@@ -99,8 +100,7 @@ class recommender:
         else:
             return (sum_xy - (sum_x * sum_y) / n) / denominator
 
-
-    def computeNearestNeighbor(self, username):
+    def sortByNearestNeighbor(self, username):
         """creates a sorted list of users based on their distance to
         username"""
         distances = []
@@ -111,49 +111,49 @@ class recommender:
                 distances.append((instance, distance))
         # sort based on distance -- closest first
         distances.sort(key=lambda movieTuple: movieTuple[1],
-                       reverse= self.fn == self.pearson)
+                       reverse=self.fn == self.pearson)
         return distances
 
     def recommend(self, user):
-       """Give list of recommendations"""
-       recommendations = {}
-       # first get list of users  ordered by nearness
-       nearest = self.computeNearestNeighbor(user)
-       #
-       # now get the ratings for the user
-       #
-       userRatings = self.data[user]
-       #
-       # determine the total distance
-       totalDistance = 0.0
-       for i in range(self.k):
-          totalDistance += nearest[i][1]
-       # now iterate through the k nearest neighbors
-       # accumulating their ratings
-       for i in range(self.k):
-          # compute slice of pie 
-          weight = nearest[i][1] / totalDistance
-          # get the name of the person
-          name = nearest[i][0]
-          # get the ratings for this person
-          neighborRatings = self.data[name]
-          # get the name of the person
-          # now find the movies that neighbor rated that user didn't
-          for movie in neighborRatings:
-             if not movie in userRatings:
-                if movie not in recommendations:
-                   recommendations[movie] = (neighborRatings[movie]
-                                              * weight)
-                else:
-                   recommendations[movie] = (recommendations[movie]
-                                              + neighborRatings[movie]
-                                              * weight)
-       # now make list from dictionary
-       recommendations = list(recommendations.items())
-       recommendations = [(self.convertProductID2name(k), v)
-                          for (k, v) in recommendations]
-       # finally sort and return
-       recommendations.sort(key=lambda movieTuple: movieTuple[1],
-                            reverse = True)
-       # Return the first n items
-       return recommendations[:self.n]
+        """Give list of recommendations"""
+        recommendations = {}
+        # first get list of users  ordered by nearness
+        nearest = self.sortByNearestNeighbor(user)
+        #
+        # now get the ratings for the user
+        #
+        userRatings = self.data[user]
+        #
+        # determine the total distance
+        totalDistance = 0.0
+        for i in range(self.k):
+            totalDistance += nearest[i][1]
+        # now iterate through the k nearest neighbors
+        # accumulating their ratings
+        for i in range(self.k):
+            # compute slice of pie
+            weight = nearest[i][1] / totalDistance
+            # get the name of the person
+            name = nearest[i][0]
+            # get the ratings for this person
+            neighborRatings = self.data[name]
+            # get the name of the person
+            # now find the movies that neighbor rated that user didn't
+            for movie in neighborRatings:
+                if not movie in userRatings:
+                    if movie not in recommendations:
+                        recommendations[movie] = (neighborRatings[movie]
+                                                  * weight)
+                    else:
+                        recommendations[movie] = (recommendations[movie]
+                                                  + neighborRatings[movie]
+                                                  * weight)
+        # now make list from dictionary
+        recommendations = list(recommendations.items())
+        recommendations = [(self.convertProductID2name(k), v)
+                           for (k, v) in recommendations]
+        # finally sort and return
+        recommendations.sort(key=lambda movieTuple: movieTuple[1],
+                             reverse=True)
+        # Return the first n items
+        return recommendations[:self.n]
